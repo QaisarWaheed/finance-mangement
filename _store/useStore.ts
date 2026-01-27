@@ -1,21 +1,30 @@
-import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Expense, StoreState } from '@/_types';
-import { getMockExpenses, getCategories, getMockUser } from '@/_services/mockApi';
+import {
+    getCategories,
+    getMockExpenses,
+    getMockUser,
+} from "@/_services/mockApi";
+import { Expense, StoreState } from "@/_types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
 
-const STORAGE_KEY = '@smartspend_store_v1';
+const STORAGE_KEY = "@smartspend_store_v1";
 
 export const useStore = create<StoreState>((set: any, get: any) => ({
   expenses: [],
-  categories: ['Food', 'Transport', 'Rent', 'Shopping', 'Bills', 'Other'],
+  categories: ["Food", "Transport", "Rent", "Shopping", "Bills", "Other"],
   budgetMonthly: 2000,
   user: undefined,
   settings: { darkMode: false, notifications: true },
 
   addExpense: (e: Expense) => set({ expenses: [e, ...get().expenses] }),
   updateExpense: (id: string, partial: Partial<Expense>) =>
-    set({ expenses: get().expenses.map((x: Expense) => (x.id === id ? { ...x, ...partial } : x)) }),
-  deleteExpense: (id: string) => set({ expenses: get().expenses.filter((x: Expense) => x.id !== id) }),
+    set({
+      expenses: get().expenses.map((x: Expense) =>
+        x.id === id ? { ...x, ...partial } : x,
+      ),
+    }),
+  deleteExpense: (id: string) =>
+    set({ expenses: get().expenses.filter((x: Expense) => x.id !== id) }),
   setBudget: (amount: number) => set({ budgetMonthly: amount }),
 
   loadInitialData: async () => {
@@ -38,10 +47,16 @@ export const useStore = create<StoreState>((set: any, get: any) => ({
       set({ expenses, categories, user });
       await AsyncStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ expenses, categories, budgetMonthly: 2000, user, settings: { darkMode: false, notifications: true } }),
+        JSON.stringify({
+          expenses,
+          categories,
+          budgetMonthly: 2000,
+          user,
+          settings: { darkMode: false, notifications: true },
+        }),
       );
     } catch (err) {
-      console.warn('Failed to load initial data', err);
+      console.warn("Failed to load initial data", err);
     }
   },
 }));

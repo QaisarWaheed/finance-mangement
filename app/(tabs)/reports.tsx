@@ -3,8 +3,8 @@ import SmallPie from "@/_components/charts/PieChart";
 import { ThemedText } from "@/_components/themed-text";
 import { ThemedView } from "@/_components/themed-view";
 import { Colors } from "@/_constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useStore } from "@/_store/useStore";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 

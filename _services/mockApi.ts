@@ -1,7 +1,14 @@
-import { Expense, Category, User } from '@/_types';
-import uuid from 'react-native-uuid';
+import { Category, Expense, User } from "@/_types";
+import uuid from "react-native-uuid";
 
-const categories: Category[] = ['Food', 'Transport', 'Rent', 'Shopping', 'Bills', 'Other'];
+const categories: Category[] = [
+  "Food",
+  "Transport",
+  "Rent",
+  "Shopping",
+  "Bills",
+  "Other",
+];
 
 export const getCategories = async (): Promise<Category[]> => {
   // small delay to simulate network
@@ -15,13 +22,15 @@ export const getMockExpenses = async (): Promise<Expense[]> => {
   const now = new Date();
   const sample = Array.from({ length: 12 }).map((_, i) => {
     const amt = Math.round(Math.random() * 120 + 5);
-    const date = new Date(now.getTime() - i * 1000 * 60 * 60 * 24 * (Math.random() * 10 + 1));
+    const date = new Date(
+      now.getTime() - i * 1000 * 60 * 60 * 24 * (Math.random() * 10 + 1),
+    );
     return {
       id: uuid.v4(),
       amount: amt,
       category: categories[Math.floor(Math.random() * categories.length)],
       date: date.toISOString(),
-      notes: Math.random() > 0.6 ? 'Coffee & snacks' : undefined,
+      notes: Math.random() > 0.6 ? "Coffee & snacks" : undefined,
     } as Expense;
   });
 
@@ -29,8 +38,8 @@ export const getMockExpenses = async (): Promise<Expense[]> => {
 };
 
 export const getMockUser = async (): Promise<User> => ({
-  id: 'u-1',
-  name: 'Jane Doe',
-  email: 'jane@example.com',
-  currency: 'USD',
+  id: "u-1",
+  name: "Jane Doe",
+  email: "jane@example.com",
+  currency: "USD",
 });

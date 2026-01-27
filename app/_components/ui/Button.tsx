@@ -1,5 +1,6 @@
-import { Colors } from "@/_constants/theme";
+import { Colors } from "@/_constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import React from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 interface Props {
@@ -9,12 +10,12 @@ interface Props {
   style?: any;
 }
 
-export default function Button({
+export const Button: React.FC<Props> = ({
   title,
   onPress,
   variant = "primary",
   style,
-}: Props) {
+}) => {
   const colorScheme = useColorScheme() ?? "light";
   const palette = Colors[colorScheme];
 
@@ -40,7 +41,7 @@ export default function Button({
       </Text>
     </Pressable>
   );
-}
+};
 
 const styles = StyleSheet.create({
   btn: {

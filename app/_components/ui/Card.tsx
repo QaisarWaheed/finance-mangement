@@ -1,14 +1,12 @@
 import { Colors } from "@/_constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import React from "react";
 import { StyleSheet, View } from "react-native";
 
-export default function Card({
+export const Card: React.FC<{ style?: any; children?: any }> = ({
   children,
   style,
-}: {
-  style?: any;
-  children?: any;
-}) {
+}) => {
   const scheme = useColorScheme() ?? "light";
   const palette = Colors[scheme];
   return (
@@ -16,7 +14,7 @@ export default function Card({
       {children}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   card: {

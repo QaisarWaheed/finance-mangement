@@ -1,22 +1,21 @@
-import { Tabs } from 'expo-router/tabs';
-import React from 'react';
-import { Dimensions } from 'react-native';
+import { Tabs } from "expo-router/tabs";
+import { Dimensions } from "react-native";
 
-import { HapticTab } from '@/_components/haptic-tab';
-import { IconSymbol } from '@/_components/ui/icon-symbol';
-import { Colors } from '@/_constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { HapticTab } from "@/_components/haptic-tab";
+import { IconSymbol } from "@/_components/ui/icon-symbol";
+import { Colors } from "@/_constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const { width: screenWidth } = Dimensions.get('window');
+  const { width: screenWidth } = Dimensions.get("window");
   const isSmallScreen = screenWidth < 375;
   const iconSize = isSmallScreen ? 24 : 28;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
@@ -27,33 +26,42 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: isSmallScreen ? 10 : 12,
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color }: { color: string }) => <IconSymbol size={iconSize} name="house.fill" color={color} />,
+          title: "Dashboard",
+          tabBarIcon: ({ color }: { color: string }) => (
+            <IconSymbol size={iconSize} name="house.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="reports"
         options={{
-          title: 'Reports',
-          tabBarIcon: ({ color }: { color: string }) => <IconSymbol size={iconSize} name="chart.bar.fill" color={color} />,
+          title: "Reports",
+          tabBarIcon: ({ color }: { color: string }) => (
+            <IconSymbol size={iconSize} name="chart.bar.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="expenses"
         options={{
-          title: 'Expenses',
-          tabBarIcon: ({ color }: { color: string }) => <IconSymbol size={iconSize} name="list.bullet" color={color} />,
+          title: "Expenses",
+          tabBarIcon: ({ color }: { color: string }) => (
+            <IconSymbol size={iconSize} name="list.bullet" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }: { color: string }) => <IconSymbol size={iconSize} name="person.fill" color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ color }: { color: string }) => (
+            <IconSymbol size={iconSize} name="person.fill" color={color} />
+          ),
         }}
       />
     </Tabs>

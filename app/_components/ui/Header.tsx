@@ -1,14 +1,12 @@
 import { Colors } from "@/_constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Header({
+export const Header: React.FC<{ title: string; subtitle?: string }> = ({
   title,
   subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+}) => {
   const scheme = useColorScheme() ?? "light";
   const palette = Colors[scheme];
   return (
@@ -19,7 +17,7 @@ export default function Header({
       ) : null}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: { paddingVertical: 12 },
