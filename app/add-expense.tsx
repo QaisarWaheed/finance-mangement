@@ -1,77 +1,113 @@
 import { useState } from "react";
-import { Pressable, View as RNView, StyleSheet, Text } from "react-native";
-// @ts-ignore: package does not provide TypeScript type declarations in this project
-import DateTimePicker from "@react-native-community/datetimepicker";
-
-import Button from "@/_components/ui/Button";
+import { Alert, Pressable, ScrollView, StyleSheet, Text } from "react-native";
+// Simple import (No named export error)
 import Input from "@/_components/ui/Input";
 import { useStore } from "@/_store/useStore";
-import uuid from "react-native-uuid";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useRouter } from "expo-router";
 
-export default function AddExpense({ route, navigation }: any) {
+export default function AddExpense() {
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
-  const [category, setCategory] = useState("Food");
+  const [category, setCategory] = useState("");
 
-  const addExpense = useStore((s: any) => s.addExpense);
+  const addExpense = useStore((s) => s.addExpense);
+  const router = useRouter();
 
   const submit = () => {
-    if (!amount || Number.isNaN(Number(amount)))
-      return alert("Enter valid amount");
+    const numAmount = parseFloat(amount);
+    if (!amount || isNaN(numAmount)) {
+      Alert.alert("Error", "Please enter a valid amount");
+      return;
+    }
+
+    if (!category.trim()) {
+      Alert.alert("Error", "Please enter a category");
+      return;
+    }
 
     addExpense({
-      id: uuid.v4(),
-      amount: Number(amount),
-      category: category as any,
+      id: Math.random().toString(36).substring(7),
+      amount: numAmount,
+      category: category,
       date: date.toISOString(),
-      notes,
+      notes: notes || "",
     });
-    navigation?.goBack();
+
+    router.back();
   };
 
   return (
-    <RNView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Add Expense</Text>
+
       <Input
-        label="Amount"
+        label="Amount ($)"
         value={amount}
         onChangeText={setAmount}
-        placeholder="0.00"
         keyboardType="numeric"
       />
+      <Input label="Category" value={category} onChangeText={setCategory} />
       <Input
-        label="Category"
-        value={category}
-        onChangeText={setCategory}
-        placeholder="Food"
+        label="Date"
+        value={date.toDateString()}
+        onFocus={() => setShowDate(true)}
       />
-      <Pressable onPress={() => setShowDate(true)} style={{ marginTop: 8 }}>
-        <Text style={{ color: "#6B7280" }}>Date: {date.toDateString()}</Text>
-      </Pressable>
       {showDate && (
         <DateTimePicker
           value={date}
           mode="date"
-          onChange={(e: any, d?: Date) => {
-            if (d) setDate(d);
+          display="default"
+          onChange={(event: any, selectedDate: Date | undefined) => {
             setShowDate(false);
+            if (selectedDate) setDate(selectedDate);
           }}
         />
       )}
+      <Input label="Notes" value={notes} onChangeText={setNotes} multiline />
 
-      <Input
-        label="Notes"
-        value={notes}
-        onChangeText={setNotes}
-        placeholder="Optional notes"
-      />
-
-      <RNView style={{ marginTop: 12 }}>
-        <Button title="Add expense" onPress={submit} />
-      </RNView>
-    </RNView>
+      {/* Submit Button */}
+      <Pressable style={styles.submitButton} onPress={submit}>
+        <Text style={styles.submitButtonText}>Submit</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({ container: { flex: 1, padding: 16 } });
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: "#fff" },
+  container: {
+    flexGrow: 1,
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  section: { marginBottom: 16 },
+  label: { fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 8 },
+  datePicker: {
+    padding: 14,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  dateLabel: { color: "#1F2937", fontSize: 16, fontWeight: "500" },
+  submitButton: {
+    backgroundColor: "#2E9CCA",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

@@ -1,25 +1,23 @@
 import SmallBar from "@/_components/charts/BarChart";
-import SmallPie from "@/_components/charts/PieChart";
+import ProfessionalPie from "@/_components/charts/PieChart";
 import { ThemedText } from "@/_components/themed-text";
 import { ThemedView } from "@/_components/themed-view";
-import { Colors } from "@/_constants/theme";
 import { useStore } from "@/_store/useStore";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { format } from "date-fns";
-import { Link } from "expo-router";
-import { useEffect, useMemo } from "react";
-import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useMemo } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Dashboard() {
-  const { expenses, loadInitialData, budgetMonthly } = useStore();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
-  const { width: screenWidth } = Dimensions.get("window");
-  const isSmallScreen = screenWidth < 375;
-
-  useEffect(() => {
-    loadInitialData();
-  }, [loadInitialData]);
+  const { expenses, budgetMonthly, incomeMonthly } = useStore();
+  const addExpense = useStore((state) => state.addExpense);
+  const router = useRouter(); // Initialize router
 
   const totals = useMemo(() => {
     const total = expenses.reduce((s, e) => s + e.amount, 0);
@@ -27,7 +25,6 @@ export default function Dashboard() {
       acc[cur.category] = (acc[cur.category] || 0) + cur.amount;
       return acc;
     }, {});
-
     return { total, categories };
   }, [expenses]);
 
@@ -40,171 +37,145 @@ export default function Dashboard() {
   }));
 
   const barLabels = expenses
-    .slice(0, 7)
+    .slice(0, 5)
+    .reverse()
     .map((e) => format(new Date(e.date), "dd MMM"));
-  const barValues = expenses.slice(0, 7).map((e) => e.amount);
+  const barValues = expenses
+    .slice(0, 5)
+    .reverse()
+    .map((e) => e.amount);
 
-  const styles = StyleSheet.create({
-    screen: {
-      flex: 1,
-    },
-    container: {
-      padding: screenWidth * 0.05, // 5% of screen width
-      paddingBottom: 40,
-    },
-    header: {
-      marginBottom: screenWidth * 0.06, // 6% of screen width
-    },
-    title: {
-      marginBottom: 4,
-    },
-    subtitle: {
-      opacity: 0.7,
-    },
-    card: {
-      backgroundColor: "#fff",
-      borderRadius: 16,
-      padding: screenWidth * 0.05,
-      marginBottom: screenWidth * 0.04,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
-    },
-    balanceCard: {
-      flexDirection: isSmallScreen ? "column" : "row",
-      justifyContent: "space-between",
-      alignItems: isSmallScreen ? "flex-start" : "center",
-      paddingVertical: screenWidth * 0.06,
-    },
-    balanceSection: {
-      flex: 1,
-      marginBottom: isSmallScreen ? 16 : 0,
-    },
-    balanceLabel: {
-      marginBottom: 8,
-      color: "#6B7280",
-    },
-    balanceAmount: {
-      color: "#059669",
-    },
-    monthlySection: {
-      alignItems: isSmallScreen ? "flex-start" : "flex-end",
-    },
-    monthlyLabel: {
-      marginBottom: 8,
-      color: "#6B7280",
-    },
-    incomeText: {
-      color: "#059669",
-      marginBottom: 4,
-    },
-    expenseText: {
-      color: "#DC2626",
-    },
-    sectionTitle: {
-      marginBottom: screenWidth * 0.04,
-      color: "#111827",
-    },
-    chartContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: screenWidth * 0.4, // 40% of screen width
-    },
-    noDataText: {
-      textAlign: "center",
-      color: "#9CA3AF",
-      fontStyle: "italic",
-    },
-    viewAllCard: {
-      alignItems: "center",
-      paddingVertical: screenWidth * 0.04,
-      backgroundColor: "#F3F4F6",
-      borderWidth: 1,
-      borderColor: "#E5E7EB",
-    },
-    viewAllText: {
-      fontSize: isSmallScreen ? 14 : 16,
-      fontWeight: "600",
-    },
-  });
+  const handleAddExpense = () => {
+    const newExpense = {
+      id: Math.random().toString(),
+      amount: 1000, // Example amount
+      category: "Food", // Example category
+      date: new Date().toISOString(),
+      notes: "Example expense",
+    };
+    addExpense(newExpense);
+  };
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.container}
-    >
+    <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
       <ThemedView style={styles.header}>
-        <ThemedText type="title" style={styles.title}>
-          Dashboard
-        </ThemedText>
-        <ThemedText type="caption" style={styles.subtitle}>
-          Monthly budget: ${budgetMonthly}
-        </ThemedText>
+        <ThemedText type="title">Dashboard</ThemedText>
+        <ThemedText type="caption">Budget: ${budgetMonthly}</ThemedText>
       </ThemedView>
 
-      <ThemedView style={[styles.card, styles.balanceCard]}>
-        <View style={styles.balanceSection}>
-          <ThemedText type="label" style={styles.balanceLabel}>
-            Total Balance
-          </ThemedText>
-          <ThemedText type="heading" style={styles.balanceAmount}>
-            ${(10000 - totals.total).toFixed(2)}
-          </ThemedText>
+      <View style={styles.balanceCard}>
+        <View>
+          <Text style={styles.label}>Total Balance</Text>
+          <Text style={styles.balanceAmount}>
+            ${(incomeMonthly - totals.total).toFixed(2)}
+          </Text>
         </View>
-        <View style={styles.monthlySection}>
-          <ThemedText type="label" style={styles.monthlyLabel}>
-            This Month
-          </ThemedText>
-          <ThemedText type="body" style={styles.incomeText}>
-            Income: $4,000
-          </ThemedText>
-          <ThemedText type="body" style={styles.expenseText}>
-            Expenses: ${totals.total.toFixed(2)}
-          </ThemedText>
+        <View style={styles.statsRow}>
+          <View>
+            <Text style={styles.incomeText}>Income: ${incomeMonthly}</Text>
+            <Text style={styles.expenseText}>
+              Spent: ${totals.total.toFixed(2)}
+            </Text>
+          </View>
         </View>
-      </ThemedView>
+      </View>
 
-      <ThemedView style={styles.card}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          Expenses by Category
-        </ThemedText>
-        <View style={styles.chartContainer}>
-          {pieData.length ? (
-            <SmallPie data={pieData} />
-          ) : (
-            <ThemedText type="body" style={styles.noDataText}>
-              No expense data available
-            </ThemedText>
-          )}
-        </View>
-      </ThemedView>
+      <View style={styles.chartCard}>
+        <Text style={styles.sectionTitle}>Expenses by Category</Text>
+        {pieData.length > 0 ? (
+          <ProfessionalPie data={pieData} />
+        ) : (
+          <Text style={styles.noData}>No expense data yet</Text>
+        )}
+      </View>
 
-      <ThemedView style={styles.card}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          Recent Expenses
-        </ThemedText>
-        <View style={styles.chartContainer}>
-          {barValues.length ? (
-            <SmallBar labels={barLabels} values={barValues} />
-          ) : (
-            <ThemedText type="body" style={styles.noDataText}>
-              No recent expenses
-            </ThemedText>
-          )}
-        </View>
-      </ThemedView>
+      <View style={styles.chartCard}>
+        <Text style={styles.sectionTitle}>Recent Spending</Text>
+        {barValues.length > 0 ? (
+          <SmallBar labels={barLabels} values={barValues} />
+        ) : (
+          <Text style={styles.noData}>No recent transactions</Text>
+        )}
+      </View>
 
-      <Link href="/expenses">
-        <Link.Trigger>
-          <ThemedView style={[styles.card, styles.viewAllCard]}>
-            <ThemedText type="link" style={styles.viewAllText}>
-              View All Expenses →
-            </ThemedText>
-          </ThemedView>
-        </Link.Trigger>
-      </Link>
+      <TouchableOpacity
+        style={[styles.viewAll, styles.buttonSpacing]}
+        activeOpacity={0.8}
+        onPress={() => router.push("/expenses")}
+      >
+        <Text style={styles.viewAllText}>View All Expenses →</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.viewAll, styles.buttonSpacing]}
+        activeOpacity={0.8}
+        onPress={() => router.push("/add-expense")}
+      >
+        <Text style={styles.viewAllText}>+ Add Expense</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.viewAll, styles.buttonSpacing]}
+        activeOpacity={0.8}
+        onPress={() => router.push("/set-income")}
+      >
+        <Text style={styles.viewAllText}>Set Income</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: "#F9FAFB" },
+  container: { padding: 20, paddingBottom: 40 },
+  header: { marginBottom: 20 },
+  balanceCard: {
+    backgroundColor: "#fff",
+    padding: 25,
+    borderRadius: 24,
+    marginBottom: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  label: { color: "#6B7280", fontSize: 14, marginBottom: 5 },
+  balanceAmount: { fontSize: 32, fontWeight: "bold", color: "#10B981" },
+  statsRow: {
+    marginTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    paddingTop: 15,
+  },
+  incomeText: { color: "#059669", fontWeight: "600" },
+  expenseText: { color: "#EF4444", fontWeight: "600", marginTop: 4 },
+  chartCard: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 24,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 15,
+    color: "#1F2937",
+  },
+  noData: {
+    textAlign: "center",
+    color: "#9CA3AF",
+    padding: 20,
+    fontStyle: "italic",
+  },
+  viewAll: {
+    backgroundColor: "#2E9CCA", // Original button color
+    padding: 18,
+    borderRadius: 16, // Original border radius
+    alignItems: "center", // Original alignment
+  },
+  viewAllText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  buttonSpacing: {
+    marginBottom: 10, // Add spacing between buttons
+  },
+});

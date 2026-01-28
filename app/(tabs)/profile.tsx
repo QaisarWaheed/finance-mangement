@@ -143,13 +143,6 @@ export default function ProfileScreen() {
         </ThemedView>
 
         <ThemedView style={styles.profileCard}>
-          <ThemedView style={styles.avatarContainer}>
-            <ThemedView style={styles.avatar}>
-              <ThemedText type="heading" style={styles.avatarText}>
-                {user?.name?.[0]?.toUpperCase() || "U"}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
           <ThemedView style={styles.userInfo}>
             <ThemedText type="heading" style={styles.userName}>
               {user?.name || "User"}

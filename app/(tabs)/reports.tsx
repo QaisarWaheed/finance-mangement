@@ -3,13 +3,13 @@ import SmallPie from "@/_components/charts/PieChart";
 import { ThemedText } from "@/_components/themed-text";
 import { ThemedView } from "@/_components/themed-view";
 import { Colors } from "@/_constants/theme";
-import { useStore } from "@/_store/useStore";
+import { Expense, useStore } from "@/_store/useStore";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ReportsScreen() {
-  const { expenses, categories } = useStore();
+  const { expenses = [], categories = [] } = useStore();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
@@ -30,14 +30,14 @@ export default function ReportsScreen() {
 
   // Category pie data
   const categoryData = categories
-    .map((cat) => ({
+    .map((cat: string) => ({
       name: cat,
       amount: expenses
-        .filter((e) => e.category === cat)
-        .reduce((sum, e) => sum + e.amount, 0),
+        .filter((e: Expense) => e.category === cat)
+        .reduce((sum: number, e: Expense) => sum + e.amount, 0),
       color: "#3B82F6", // Default color since categories are strings
     }))
-    .filter((d) => d.amount > 0);
+    .filter((d: { amount: number }) => d.amount > 0);
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 

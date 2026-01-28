@@ -1,52 +1,51 @@
-import { Colors } from "@/_constants/colors";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+} from "react-native";
 
-interface Props {
-  label?: string;
-  value?: string;
-  onChangeText?: (t: string) => void;
-  placeholder?: string;
-  keyboardType?: any;
-  style?: any;
+// Humne yahan 'TextInputProps' extend kiya hai taake multiline wagera chalein
+interface Props extends TextInputProps {
+  label: string;
 }
 
-export default function Input({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType,
-  style,
-}: Props) {
-  const scheme = useColorScheme() ?? "light";
-  const palette = Colors[scheme];
-
+const Input = ({ label, ...props }: Props) => {
   return (
-    <View style={style}>
-      {label ? (
-        <Text style={[styles.label, { color: palette.muted }]}>{label}</Text>
-      ) : null}
+    <View style={styles.container}>
+      <Text style={styles.label}>{label}</Text>
       <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={palette.muted}
         style={[
           styles.input,
-          { backgroundColor: palette.card, color: palette.text },
+          props.multiline && { height: 100, textAlignVertical: "top" }, // Multiline ke liye extra style
         ]}
-        keyboardType={keyboardType}
+        placeholderTextColor="#9CA3AF"
+        {...props} // Saari baqi props yahan pass ho jayengi
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  label: { marginBottom: 6, fontSize: 13 },
+  container: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 6,
+  },
   input: {
-    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
     padding: 12,
+    borderRadius: 12,
     fontSize: 16,
+    color: "#111827",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
 });
+
+export default Input;

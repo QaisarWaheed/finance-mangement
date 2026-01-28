@@ -1,62 +1,83 @@
-import {
-    getCategories,
-    getMockExpenses,
-    getMockUser,
-} from "@/_services/mockApi";
-import { Expense, StoreState } from "@/_types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { create } from "zustand";
+import * as SecureStore from "expo-secure-store";
+import { create, StateCreator } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
-const STORAGE_KEY = "@smartspend_store_v1";
-
-export const useStore = create<StoreState>((set: any, get: any) => ({
-  expenses: [],
-  categories: ["Food", "Transport", "Rent", "Shopping", "Bills", "Other"],
-  budgetMonthly: 2000,
-  user: undefined,
-  settings: { darkMode: false, notifications: true },
-
-  addExpense: (e: Expense) => set({ expenses: [e, ...get().expenses] }),
-  updateExpense: (id: string, partial: Partial<Expense>) =>
-    set({
-      expenses: get().expenses.map((x: Expense) =>
-        x.id === id ? { ...x, ...partial } : x,
-      ),
-    }),
-  deleteExpense: (id: string) =>
-    set({ expenses: get().expenses.filter((x: Expense) => x.id !== id) }),
-  setBudget: (amount: number) => set({ budgetMonthly: amount }),
-
-  loadInitialData: async () => {
-    try {
-      // try to load from storage
-      const saved = await AsyncStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        set(parsed);
-        return;
-      }
-
-      // otherwise load mock data
-      const [expenses, categories, user] = await Promise.all([
-        getMockExpenses(),
-        getCategories(),
-        getMockUser(),
-      ]);
-
-      set({ expenses, categories, user });
-      await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          expenses,
-          categories,
-          budgetMonthly: 2000,
-          user,
-          settings: { darkMode: false, notifications: true },
-        }),
-      );
-    } catch (err) {
-      console.warn("Failed to load initial data", err);
-    }
-  },
+const secureStorage = createJSONStorage(() => ({
+  getItem: SecureStore.getItemAsync,
+  setItem: SecureStore.setItemAsync,
+  removeItem: SecureStore.deleteItemAsync,
 }));
+
+export interface Expense {
+  id: string;
+  amount: number;
+  category: string;
+  date: string;
+  notes: string;
+}
+
+interface User {
+  email: string;
+  name: string; // Added name property
+}
+
+interface StoreState {
+  expenses: Expense[];
+  categories: string[]; // Added categories property
+  budgetMonthly: number;
+  incomeMonthly: number;
+  settings: {
+    darkMode: boolean;
+    notifications: boolean;
+  }; // Added settings property
+  _hasHydrated: boolean; // Ye flag check karega ke data load ho gaya ya nahi
+  setHasHydrated: (state: boolean) => void;
+  addExpense: (e: Expense) => void;
+  deleteExpense: (id: string) => void;
+  setIncome: (income: number) => void; // Add setIncome method
+  user: User | null; // Add user property
+  setUser: (user: User | null) => void; // Add setUser method
+  deleteAccount: () => void; // Add deleteAccount method
+}
+
+export const useStore = create<StoreState>()(
+  persist(
+    (set) => ({
+      expenses: [],
+      categories: [],
+      budgetMonthly: 0,
+      incomeMonthly: 0,
+      settings: {
+        darkMode: false,
+        notifications: true,
+      },
+      _hasHydrated: false,
+      user: null,
+
+      setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
+
+      addExpense: (e: Expense) =>
+        set((state) => ({
+          expenses: [e, ...(state.expenses || [])],
+          categories: Array.from(
+            new Set([...(state.categories || []), e.category]),
+          ),
+        })),
+
+      deleteExpense: (id: string) =>
+        set((state) => ({
+          expenses: (state.expenses || []).filter((x) => x.id !== id),
+        })),
+
+      setIncome: (income: number) => set({ incomeMonthly: income }),
+
+      setUser: (user: User | null) => set({ user }),
+
+      deleteAccount: () => set({ user: null, expenses: [], categories: [] }),
+    }),
+    {
+      name: "finance-store",
+      storage: secureStorage, // Use secure storage for sensitive data
+    },
+  ),
+);
